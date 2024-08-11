@@ -3,13 +3,34 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from datetime import datetime
 import os
+from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
 
-#Source
-#https://www.taifex.com.tw/cht/3/totalTableDateExcel
+Base = declarative_base()
+
+class TaifexData3Total(Base):
+    __tablename__ = 'taifex_data_3total'
+
+    id = Column(Integer, primary_key=True)
+    date = Column(Date)
+    data_type = Column(String)
+    identity = Column(String)
+    long_position = Column(Integer)
+    long_amount = Column(Float)
+    short_position = Column(Integer)
+    short_amount = Column(Float)
+    net_position = Column(Integer)
+    net_amount = Column(Float)
+
+    # 添加唯一約束，以防止重複數據
+    __table_args__ = (UniqueConstraint('date', 'data_type', 'identity', name='uix_1'),)
+
 def get_taifex_data(url):
     try:
         response = requests.get(url)
-        response.raise_for_status()  # 如果請求不成功則拋出異常
+        response.raise_for_status()
         response.encoding = 'utf-8'
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -66,29 +87,8 @@ def get_taifex_data(url):
         print(f"發生錯誤：{e}")
         return None, pd.DataFrame()
 
-# 使用函數獲取數據
-url = "https://www.taifex.com.tw/cht/3/totalTableDateExcel"
-web_date, df_result = get_taifex_data(url)
-
-if df_result.empty:
-    print("無法獲取數據，請檢查網絡連接或網頁結構是否發生變化。")
-else:
-    # 打印數據檢查
-    print(df_result)
-
-    # 獲取當前腳本的目錄
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # 構建到 datarecord 目錄的路徑
-    target_dir = os.path.abspath(os.path.join(current_dir, '..', '..', 'datarecord'))
-
-    # 確保目標目錄存在
-    os.makedirs(target_dir, exist_ok=True)
-
-    # 獲取當前日期和時間
+def save_to_csv(df, target_dir, web_date):
     current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
-
-    # 使用網頁中的日期和當前日期時間生成文件名
     if web_date:
         filename = f'processed_taifex_data_{web_date}_{current_datetime}.csv'
     else:
@@ -96,11 +96,61 @@ else:
 
     full_path = os.path.join(target_dir, filename)
 
-    # 保存為 CSV 文件
     try:
-        df_result.to_csv(full_path, index=False, encoding='utf-8-sig')
+        df.to_csv(full_path, index=False, encoding='utf-8-sig')
         print(f"數據已成功保存為 CSV 文件：{full_path}")
-    except PermissionError:
-        print(f"無法保存文件 {full_path}。請確保文件未被其他程序打開。")
     except Exception as e:
-        print(f"保存文件時發生錯誤：{e}")
+        print(f"保存 CSV 文件時發生錯誤：{e}")
+
+def save_to_postgres(df, engine):
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        for _, row in df.iterrows():
+            data = TaifexData3Total(
+                date=row['日期'],
+                data_type=row['類型'],
+                identity=row['身分別'],
+                long_position=row['多方口數'],
+                long_amount=row['多方契約金額'],
+                short_position=row['空方口數'],
+                short_amount=row['空方契約金額'],
+                net_position=row['多空淨額口數'],
+                net_amount=row['多空淨額契約金額']
+            )
+            session.add(data)
+            try:
+                session.commit()
+            except IntegrityError:
+                session.rollback()
+                print(f"跳過重複數據: 日期 {row['日期']}, 類型 {row['類型']}, 身分別 {row['身分別']}")
+
+        print("數據已成功保存到 PostgreSQL 數據庫")
+    except Exception as e:
+        session.rollback()
+        print(f"保存到 PostgreSQL 數據庫時發生錯誤：{e}")
+    finally:
+        session.close()
+
+# 主程序
+if __name__ == "__main__":
+    url = "https://www.taifex.com.tw/cht/3/totalTableDateExcel"
+    web_date, df_result = get_taifex_data(url)
+
+    if df_result.empty:
+        print("無法獲取數據，請檢查網絡連接或網頁結構是否發生變化。")
+    else:
+        # 設置 PostgreSQL 連接
+        # 請替換以下連接字符串中的用戶名、密碼、主機和數據庫名稱
+        engine = create_engine('postgresql://postgres:5432@localhost:5432/NewDB')
+        Base.metadata.create_all(engine)
+
+        # 保存到 PostgreSQL
+        save_to_postgres(df_result, engine)
+
+        # 保存到 CSV（保留但不使用）
+        # current_dir = os.path.dirname(os.path.abspath(__file__))
+        # target_dir = os.path.abspath(os.path.join(current_dir, '..', '..', 'datarecord'))
+        # os.makedirs(target_dir, exist_ok=True)
+        # save_to_csv(df_result, target_dir, web_date)
