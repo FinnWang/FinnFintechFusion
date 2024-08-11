@@ -17,16 +17,16 @@ def get_taifex_data(url):
         date_element = soup.find('span', class_='right')
         if not date_element:
             print("警告：無法找到日期元素")
-            date = datetime.now().strftime('%Y-%m-%d')
+            date = None
         else:
-            date_str = date_element.text.strip().split('日期')[-1]
+            date_str = date_element.text.strip().split('日期')[-1].strip()
             date = datetime.strptime(date_str, '%Y/%m/%d').strftime('%Y-%m-%d')
 
         # 找到所有表格
         tables = soup.find_all('table', class_='table_c')
         if len(tables) < 2:
             print(f"警告：只找到 {len(tables)} 個表格，預期至少2個")
-            return pd.DataFrame()  # 返回空的DataFrame
+            return date, pd.DataFrame()
 
         def parse_table(table, table_type):
             data = []
@@ -57,19 +57,18 @@ def get_taifex_data(url):
         numeric_columns = columns[3:]
         df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric, errors='coerce')
 
-        return df
+        return date, df
 
     except requests.RequestException as e:
         print(f"請求錯誤：{e}")
-        return pd.DataFrame()
+        return None, pd.DataFrame()
     except Exception as e:
         print(f"發生錯誤：{e}")
-        return pd.DataFrame()
-
+        return None, pd.DataFrame()
 
 # 使用函數獲取數據
 url = "https://www.taifex.com.tw/cht/3/totalTableDateExcel"
-df_result = get_taifex_data(url)
+web_date, df_result = get_taifex_data(url)
 
 if df_result.empty:
     print("無法獲取數據，請檢查網絡連接或網頁結構是否發生變化。")
@@ -77,22 +76,31 @@ else:
     # 打印數據檢查
     print(df_result)
 
-    # 生成文件名
-    current_date = datetime.now().strftime('%Y%m%d')
-    base_filename = f'processed_taifex_data_{current_date}.csv'
+    # 獲取當前腳本的目錄
+    current_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # 檢查文件是否存在，如果存在則添加時間
-    if os.path.exists(base_filename):
-        current_time = datetime.now().strftime('%H%M%S')
-        filename = f'processed_taifex_data_{current_date}_{current_time}.csv'
+    # 構建到 datarecord 目錄的路徑
+    target_dir = os.path.abspath(os.path.join(current_dir, '..', '..', 'datarecord'))
+
+    # 確保目標目錄存在
+    os.makedirs(target_dir, exist_ok=True)
+
+    # 獲取當前日期和時間
+    current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
+
+    # 使用網頁中的日期和當前日期時間生成文件名
+    if web_date:
+        filename = f'processed_taifex_data_{web_date}_{current_datetime}.csv'
     else:
-        filename = base_filename
+        filename = f'processed_taifex_data_unknown_{current_datetime}.csv'
+
+    full_path = os.path.join(target_dir, filename)
 
     # 保存為 CSV 文件
     try:
-        df_result.to_csv(filename, index=False, encoding='utf-8-sig')
-        print(f"數據已成功保存為 CSV 文件：{filename}")
+        df_result.to_csv(full_path, index=False, encoding='utf-8-sig')
+        print(f"數據已成功保存為 CSV 文件：{full_path}")
     except PermissionError:
-        print(f"無法保存文件 {filename}。請確保文件未被其他程序打開。")
+        print(f"無法保存文件 {full_path}。請確保文件未被其他程序打開。")
     except Exception as e:
         print(f"保存文件時發生錯誤：{e}")
