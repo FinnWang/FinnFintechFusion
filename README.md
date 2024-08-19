@@ -8,6 +8,9 @@ https://www.taifex.com.tw/cht/3/largeTraderFutQryTbl
 三大法人-總表
 https://www.taifex.com.tw/cht/3/totalTableDateExcel
 
+三大法人-區分各期貨契約
+https://www.taifex.com.tw/cht/3/futContractsDateExcel
+
 
 我的目的是透過爬蟲蒐集台灣股市的盤後數據，數據包含股票`期貨`選擇權`等等資訊.詳細內容我還須要想一下
 
