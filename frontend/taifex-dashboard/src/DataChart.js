@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Chart as ChartJS,
-  CategoryScale,     // 必須註冊這個類別比例
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -11,9 +11,8 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
-// 確保註冊了所有必要的元素
 ChartJS.register(
-  CategoryScale,     // 這是 x 軸的類別比例
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
@@ -22,10 +21,13 @@ ChartJS.register(
   Legend
 );
 
-
 function DataChart({ data }) {
+  // 構建數據標籤（通常是日期）
+  const labels = data.map(item => item.date);
+
+  // 構建數據集（多方口數和空方口數）
   const chartData = {
-    labels: data.map(item => item.date),
+    labels: labels,
     datasets: [
       {
         label: '多方口數',
@@ -42,7 +44,21 @@ function DataChart({ data }) {
     ],
   };
 
-  return <Line data={chartData} />;
+  // 設置圖表選項
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: '多空口數趨勢圖',
+      },
+    },
+  };
+
+  return <Line data={chartData} options={options} />;
 }
 
 export default DataChart;

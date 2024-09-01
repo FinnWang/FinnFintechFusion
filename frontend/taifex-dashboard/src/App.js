@@ -4,19 +4,32 @@ import DataChart from './DataChart';
 
 function App() {
   const [data, setData] = useState(null);
+  const [range, setRange] = useState('30'); // 默認顯示過去30天的數據
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/data')
+    fetch(`http://localhost:5000/api/data?start_date=${getStartDate(range)}`)
       .then(response => response.json())
-      .then(data => setData(data.data))  // 確保設置數據後再渲染圖表
+      .then(data => setData(data.data))
       .catch(error => console.error('Error fetching data:', error));
-  }, []);
+  }, [range]);
+
+  // 計算起始日期
+  function getStartDate(days) {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    return date.toISOString().split('T')[0];
+  }
 
   return (
     <div className="App">
       <header className="App-header">
         <h1>資料圖表展示</h1>
-        {data ? <DataChart key={Math.random()} data={data} /> : <p>加載中...</p>}
+        <div>
+          <button onClick={() => setRange('7')}>過去7天</button>
+          <button onClick={() => setRange('30')}>過去30天</button>
+          <button onClick={() => setRange('90')}>過去90天</button>
+        </div>
+        {data ? <DataChart data={data} /> : <p>加載中...</p>}
       </header>
     </div>
   );
