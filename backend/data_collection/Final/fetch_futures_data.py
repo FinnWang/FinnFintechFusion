@@ -167,7 +167,7 @@ if __name__ == "__main__":
         save_to_postgres(df_result, engine)
 
         # 保存為CSV
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        target_dir = os.path.abspath(os.path.join(current_dir, '..', 'datarecord'))
-        os.makedirs(target_dir, exist_ok=True)
-        save_to_csv(df_result, web_date, target_dir)
+        #current_dir = os.path.dirname(os.path.abspath(__file__))
+        #target_dir = os.path.abspath(os.path.join(current_dir, '..', 'datarecord'))
+        #os.makedirs(target_dir, exist_ok=True)
+        #save_to_csv(df_result, web_date, target_dir)
