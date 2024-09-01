@@ -6,8 +6,10 @@ import numpy as np
 from datetime import date, datetime
 import logging
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
