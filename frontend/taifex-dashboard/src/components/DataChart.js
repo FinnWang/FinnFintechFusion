@@ -23,7 +23,11 @@ ChartJS.register(
 
 function DataChart({ data }) {
   // 構建數據標籤（通常是日期）
-  const labels = data.map(item => item.date);
+  const labels = data.map(item => {
+    const dateObj = new Date(item.date);
+    const options = { weekday: 'short', year: 'numeric', month: 'numeric', day: 'numeric' };
+    return dateObj.toLocaleDateString('zh-TW', options); // Adjust the locale as per your requirement
+  });
 
   // 構建數據集（多方口數和空方口數）
   const chartData = {
