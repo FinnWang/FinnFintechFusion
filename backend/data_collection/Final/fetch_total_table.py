@@ -1,11 +1,15 @@
-import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-import pandas as pd
 from datetime import datetime
+import pandas as pd
 import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker,declarative_base
 from sqlalchemy.exc import IntegrityError
 
 Base = declarative_base()
@@ -29,10 +33,27 @@ class TaifexData3Total(Base):
 
 def get_taifex_data(url):
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        response.encoding = 'utf-8'
-        soup = BeautifulSoup(response.text, 'html.parser')
+        # 使用 Selenium 進行網頁抓取
+        chrome_options = Options()
+        #chrome_options.add_argument('--headless')  # 無頭模式
+        chrome_options.add_argument('--disable-gpu')  # 禁用 GPU
+        chrome_options.add_argument('--no-sandbox')  # 取消沙盒模式
+
+        # 設定 ChromeDriver 的路徑
+        service = Service('C:\Finn\Git\chromedriver-win64\chromedriver.exe')  # 替換為你的 chromedriver.exe 的實際路徑
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        
+        driver.get(url)
+        
+        # 顯式等待，直到表格出現
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "table_c"))
+        )
+
+        # 獲取網頁的 HTML
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+        driver.quit()  # 關閉瀏覽器
 
         # 提取日期
         date_element = soup.find('span', class_='right')
@@ -80,12 +101,10 @@ def get_taifex_data(url):
 
         return date, df
 
-    except requests.RequestException as e:
-        print(f"請求錯誤：{e}")
-        return None, pd.DataFrame()
     except Exception as e:
         print(f"發生錯誤：{e}")
-        return None, pd.DataFrame()
+        driver.quit()  # 確保在錯誤時關閉瀏覽器
+        raise  # 重新引發錯誤以獲得完整的錯誤堆疊信息
 
 def save_to_csv(df, target_dir, web_date):
     current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
