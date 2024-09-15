@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import DataChart from '../Charts/DataChart'; // 正確的相對路徑
+import DataChart from '../Charts/DataChart'; // 確保這是正確的導入路徑
 
 function DataFetch() {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [filterType, setFilterType] = useState('交易口數與契約金額'); // 默認資料類型
-  const [filterIdentity, setFilterIdentity] = useState('自營商'); // 默認身份
+  const [filterType, setFilterType] = useState('交易口數與契約金額'); 
+  const [selectedIdentities, setSelectedIdentities] = useState(['自營商']); 
+  const [viewType, setViewType] = useState('all'); // 新增一個狀態來控制查看多方或空方
 
   useEffect(() => {
     fetch('http://localhost:5000/api/data')  // 使用您的 Flask API 地址
       .then(response => response.json())
       .then(data => {
         setData(data.data);
-        filterData(data.data, filterType, filterIdentity); // 初始過濾
+        filterData(data.data, filterType, selectedIdentities); // 初始過濾
       })
       .catch(error => console.error('Error fetching data:', error));
       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 過濾數據的方法
-  const filterData = (data, type, identity) => {
-    const filtered = data.filter(item => item.data_type === type && item.identity === identity);
+  const filterData = (data, type, identities) => {
+    const filtered = data.filter(item => item.data_type === type && identities.includes(item.identity));
     setFilteredData(filtered);
   };
 
@@ -29,17 +30,24 @@ function DataFetch() {
     const selectedType = event.target.value;
     setFilterType(selectedType);
     if (data) {
-      filterData(data, selectedType, filterIdentity);
+      filterData(data, selectedType, selectedIdentities);
     }
   };
 
-  // 處理身份過濾條件改變
-  const handleFilterIdentityChange = (event) => {
-    const selectedIdentity = event.target.value;
-    setFilterIdentity(selectedIdentity);
-    if (data) {
-      filterData(data, filterType, selectedIdentity);
-    }
+  // 處理身份多選框的改變
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+    const updatedIdentities = checked
+      ? [...selectedIdentities, value]
+      : selectedIdentities.filter(identity => identity !== value);
+
+    setSelectedIdentities(updatedIdentities);
+    filterData(data, filterType, updatedIdentities);
+  };
+
+  // 處理查看類型
+  const handleViewTypeChange = (event) => {
+    setViewType(event.target.value);
   };
 
   return (
@@ -53,38 +61,75 @@ function DataFetch() {
         <option value="未平倉口數與契約金額">未平倉口數與契約金額</option>
       </select>
 
-      {/* 身份選擇 */}
-      <label htmlFor="identity-filter">選擇身份: </label>
-      <select id="identity-filter" value={filterIdentity} onChange={handleFilterIdentityChange}>
-        <option value="自營商">自營商</option>
-        <option value="投信">投信</option>
-        <option value="外資">外資</option>
-        <option value="合計">合計</option>
-      </select>
+      {/* 身份多選框 */}
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            value="自營商"
+            checked={selectedIdentities.includes('自營商')}
+            onChange={handleCheckboxChange}
+          /> 自營商
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="投信"
+            checked={selectedIdentities.includes('投信')}
+            onChange={handleCheckboxChange}
+          /> 投信
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="外資"
+            checked={selectedIdentities.includes('外資')}
+            onChange={handleCheckboxChange}
+          /> 外資
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            value="合計"
+            checked={selectedIdentities.includes('合計')}
+            onChange={handleCheckboxChange}
+          /> 合計
+        </label>
+      </div>
 
-      {/* 傳遞 filteredData 給 DataChart */}
-      <DataChart filteredData={filteredData} />
+      {/* 增加篩選按鈕 */}
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="viewType"
+            value="all"
+            checked={viewType === 'all'}
+            onChange={handleViewTypeChange}
+          /> 全部
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="viewType"
+            value="long"
+            checked={viewType === 'long'}
+            onChange={handleViewTypeChange}
+          /> 只看多方
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="viewType"
+            value="short"
+            checked={viewType === 'short'}
+            onChange={handleViewTypeChange}
+          /> 只看空方
+        </label>
+      </div>
 
-      {filteredData ? (
-        <ul>
-          {filteredData.map((item, index) => (
-            <li key={index}>
-              <p>日期: {item.date}</p>
-              <p>資料類型: {item.data_type}</p>
-              <p>身分別: {item.identity}</p>
-              <p>多方口數: {item.long_position}</p>
-              <p>多方契約金額: {item.long_amount}</p>
-              <p>空方口數: {item.short_position}</p>
-              <p>空方契約金額: {item.short_amount}</p>
-              <p>多空淨額口數: {item.net_position}</p>
-              <p>多空淨額金額: {item.net_amount}</p>
-              <hr />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>加載中...</p>
-      )}
+      {/* 傳遞 filteredData 和 viewType 給 DataChart */}
+      <DataChart filteredData={filteredData} viewType={viewType} />
     </div>
   );
 }
