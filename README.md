@@ -11,21 +11,36 @@ https://www.taifex.com.tw/cht/3/totalTableDateExcel
 三大法人-區分各期貨契約
 https://www.taifex.com.tw/cht/3/futContractsDateExcel
 
+請用繁體中文與台灣地區慣用的方式回答我
 
-我的目的是透過爬蟲蒐集台灣股市的盤後數據，數據包含股票`期貨`選擇權`等等資訊.詳細內容我還須要想一下
+我的目的是透過爬蟲蒐集台灣股市的盤後數據，數據包含股票`期貨`選擇權`等等資訊.
 
 但目的是會有一個響應式的前端介面,讓我每日可以執行這個程式.並開始蒐集資料.並透過一個簡易的互動式介面,可以視覺化的呈現今日與昨日的比較,以及這周的股市籌碼變化
 
-關於響應式的前端介面與簡易的互動式介面以及視覺化的呈現  有哪些工具可以使用
+目前使用Visual Studio Code進行專案
 
-我目前只有使用過Pycharm與Python 我不排斥其他語言以及使用其他的平台(例如Visual code) 請給我好的建議
-
-
-資料蒐集與處理 : Python
-Dataabase : PostgreSQL(備選 : SQLite)
-後端框架 : Flask
+IDE : Visual studio code
+後端資料蒐集與處理 : Python
+後端框架 : Flask + sqlalchemy
+Dataabase : PostgreSQL
 前端框架 : React + ChartJS
-數據可視化 : ""Plotly" / D3.js / Chart.js (我想要搭配互動式做交互) 該如何選擇
+
+
+CSS 框架(TBD) :
+Bootstrap：提供預設樣式和響應式佈局，使用方便，可以搭配 React 一起使用。
+Tailwind CSS：提供實用性優先的工具類別，讓你可以快速定制樣式。
+UI 框架(TBD) :
+Material-UI：為 React 提供了一組基於 Material Design 的元件，可以讓你快速建立現代風格的使用者介面。
+Ant Design：提供了豐富的 UI 元件，適合構建企業級應用。
+
+部署平台(TBD):
+Heroku（適合初學者）：提供免費的部署方案，支援 Flask 和 React。
+Vercel（適合前端）：專為前端應用設計，但也支援全端應用。
+AWS（Amazon Web Services）：提供更強大的自定義和擴展選項，例如 EC2（虛擬機器）、S3（靜態檔案儲存）、RDS（資料庫服務）。
+Google Cloud Platform：提供類似 AWS 的服務，例如 Compute Engine、App Engine 等。
+DigitalOcean：提供簡單的虛擬機器和應用程式部署服務。
+
+該如何選擇
 
 
 
