@@ -26,9 +26,10 @@ ChartJS.register(
   Legend
 );
 
-function DataChart({ filteredData, viewType }) {
+function DataChart({ filteredData = [], viewType }) {
+  // 確保 filteredData 有數據
   if (!filteredData || filteredData.length === 0) {
-    return <div>加載中或沒有數據...</div>;
+    return <div>無可顯示的數據...</div>;
   }
 
   const uniqueDates = [...new Set(filteredData.map(item => item.date))];
@@ -51,7 +52,7 @@ function DataChart({ filteredData, viewType }) {
   };
 
   const identities = [...new Set(filteredData.map(item => item.identity))];
-  
+
   identities.forEach(identity => {
     const identityData = filteredData.filter(item => item.identity === identity);
     const color = colors[identity] || { baseColor: '#000000' }; // 預設黑色
@@ -101,8 +102,9 @@ function DataChart({ filteredData, viewType }) {
     }
   });
 
+  // 在圖表中，確保 labels 按時間順序排列
   const chartData = {
-    labels: uniqueDates,
+    labels: uniqueDates.sort((a, b) => new Date(a) - new Date(b)), // 按照日期順序排序
     datasets: datasets,
   };
 
@@ -110,13 +112,7 @@ function DataChart({ filteredData, viewType }) {
     responsive: true,
     scales: {
       x: {
-        type: 'time',
-        time: {
-          unit: 'day',
-          displayFormats: {
-            day: 'yyyy/MM/dd'
-          }
-        },
+        type: 'category', // 使用 category 類型以支持自定義日期標籤
         title: {
           display: true,
           text: '日期'
