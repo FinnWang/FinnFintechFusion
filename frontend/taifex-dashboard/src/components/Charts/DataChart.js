@@ -69,6 +69,8 @@ function DataChart({ filteredData = [], viewType }) {
         label: `${identity} 多方口數`,
         data: identityData.map(item => item.long_position),
         borderColor: deepColor,
+        pointBackgroundColor: deepColor, // 數據點標記顏色
+        pointRadius: 3, // 取消數據點標記
         yAxisID: 'y-axis-counts',
         fill: false,
       });
@@ -88,6 +90,8 @@ function DataChart({ filteredData = [], viewType }) {
         label: `${identity} 空方口數`,
         data: identityData.map(item => item.short_position),
         borderColor: lightColor,
+        pointBackgroundColor: lightColor, // 數據點標記顏色
+        pointRadius: 3, // 取消數據點標記
         yAxisID: 'y-axis-counts',
         fill: false,
       });
@@ -102,7 +106,6 @@ function DataChart({ filteredData = [], viewType }) {
     }
   });
 
-  // 在圖表中，確保 labels 按時間順序排列
   const chartData = {
     labels: uniqueDates.sort((a, b) => new Date(a) - new Date(b)), // 按照日期順序排序
     datasets: datasets,
@@ -139,10 +142,27 @@ function DataChart({ filteredData = [], viewType }) {
       legend: {
         position: 'top',
       },
+      tooltip: { // 簡化提示工具
+        enabled: true,
+        mode: 'nearest', // 僅顯示最接近的數據點
+        //mode: 'index'  //同時顯示 X 軸上所有數據點的信息
+        intersect: false,
+      },
       title: {
         display: true,
         text: '多空口數與契約金額趨勢圖',
       },
+    },
+    elements: {
+      point: {
+        radius: 0, // 設置默認數據點標記大小為 0
+        hoverRadius: 6, // 滑鼠懸停時的數據點大小
+      },
+    },
+    hover: {
+      mode: 'nearest', // 確保滑鼠懸停時僅顯示最近的數據點
+      //mode: 'index'  //同時顯示 X 軸上所有數據點的信息
+      intersect: true,
     },
   };
 
