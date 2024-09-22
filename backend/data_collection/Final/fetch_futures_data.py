@@ -56,7 +56,7 @@ def get_taifex_futures_contracts_data(url):
         
         # 顯式等待，直到表格出現
         WebDriverWait(driver, 30).until(
-            EC.presence_of_all_elements_located((By.CLASS_NAME, "table_f"))
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "table_f table-fixed w-1000 m-1280"))
         )
 
         # 獲取網頁的 HTML
@@ -73,7 +73,7 @@ def get_taifex_futures_contracts_data(url):
         date = datetime.strptime(date_str, '%Y/%m/%d').date()
 
         # 找到主要數據表格
-        table = soup.find('table', class_='table_f')
+        table = soup.find('table', class_='table_f table-fixed w-1000 m-1280')
         if not table:
             print("警告：無法找到數據表格")
             return date, pd.DataFrame()
@@ -187,8 +187,8 @@ if __name__ == "__main__":
         # 保存到 PostgreSQL
         save_to_postgres(df_result, engine)
 
-        # 保存為CSV
-        # current_dir = os.path.dirname(os.path.abspath(__file__))
-        # target_dir = os.path.abspath(os.path.join(current_dir, '..', 'datarecord'))
-        # os.makedirs(target_dir, exist_ok=True)
-        # save_to_csv(df_result, web_date, target_dir)
+        #保存為CSV
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        target_dir = os.path.abspath(os.path.join(current_dir, '..', 'datarecord'))
+        os.makedirs(target_dir, exist_ok=True)
+        save_to_csv(df_result, web_date, target_dir)
