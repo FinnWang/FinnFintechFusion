@@ -1,15 +1,17 @@
 Todo
-_期貨契約_網頁原始檔案
-https://www.taifex.com.tw/cht/3/futContractsDateExcel
 
 _期貨大額交易人未沖銷部位結構表_網頁原始檔案
 https://www.taifex.com.tw/cht/3/largeTraderFutQryTbl
 
-三大法人-總表
+三大法人-總表 (fetch_total_table.py)
 https://www.taifex.com.tw/cht/3/totalTableDateExcel
 
-三大法人-區分各期貨契約
+三大法人-區分各期貨契約(https://fetch_futures_data.py/)
 https://www.taifex.com.tw/cht/3/futContractsDateExcel
+
+三大法人-選擇權買賣權分計
+https://www.taifex.com.tw/cht/3/callsAndPutsDateExcel
+
 
 請用繁體中文與台灣地區慣用的方式回答我
 
