@@ -1,0 +1,20 @@
+/* Cryptocurrencies.css */
+.chart-container {
+    width: 80%; /* 適當調整寬度，避免圖表過大 */
+    height: 500px; /* 增加高度，提升圖表可讀性 */
+    margin: 0 auto; /* 置中 */
+}
+  
+.table-container {
+    width: 85%; /* 調整為 90%，讓表格更寬 */
+    margin: 30px auto; /* 增加上下間距，使分隔更明顯 */
+}
+  
+.loading-text {
+    text-align: center; /* 置中 "加載中..." 文字 */
+    color: #666; /* 設定文字顏色 */
+    font-size: 18px; /* 增加字體大小 */
+    margin-top: 50px; /* 增加頂部間距 */
+}
+
+  

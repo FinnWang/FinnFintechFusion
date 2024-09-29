@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DataChart from '../Charts/DataChart'; 
 import DataFetch from '../DataTable/DataFetch';
+import './Cryptocurrencies.css';
 
 const Cryptocurrencies = () => {
     const [cryptoData, setCryptoData] = useState(null);
@@ -15,13 +16,19 @@ const Cryptocurrencies = () => {
 
     return (
         <div>
-            <h2>Cryptocurrencies</h2>
-            {/* 如果有數據，顯示圖表 */}
-            {cryptoData ? <DataChart data={cryptoData} /> : <p>加載中...</p>}
-            {/* 顯示數據列表 */}
+          <h2>Cryptocurrencies</h2>
+          {/* 如果有數據，顯示圖表 */}
+          {cryptoData ? <div className="chart-container">
+                        <DataChart data={cryptoData} />
+                                    </div>
+                      : <p>加載中...</p>}
+          
+          {/* 顯示數據列表 */}
+          <div className="table-container">
             <DataFetch />
+          </div>
         </div>
-    );
+      );
 };
 
 export default Cryptocurrencies;
