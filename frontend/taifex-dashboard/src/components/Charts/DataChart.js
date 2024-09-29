@@ -127,7 +127,8 @@ function DataChart({ filteredData = [], viewType }) {
         title: {
           display: true,
           text: '口數'
-        }
+        },
+        min: 0,  // 將 y 軸最小值設定為 0
       },
       'y-axis-amount': {
         type: 'linear',
@@ -135,7 +136,8 @@ function DataChart({ filteredData = [], viewType }) {
         title: {
           display: true,
           text: '金額'
-        }
+        },
+        min: 0,  // 將 y 軸最小值設定為 0
       }
     },
     plugins: {
