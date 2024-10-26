@@ -11,6 +11,8 @@ import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint
 from sqlalchemy.orm import sessionmaker,declarative_base
 from sqlalchemy.exc import IntegrityError
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 Base = declarative_base()
 
@@ -32,6 +34,7 @@ class TaifexData3Total(Base):
     __table_args__ = (UniqueConstraint('date', 'data_type', 'identity', name='uix_1'),)
 
 def get_taifex_data(url):
+    driver = None
     try:
         # 使用 Selenium 進行網頁抓取
         chrome_options = Options()
@@ -40,9 +43,12 @@ def get_taifex_data(url):
         chrome_options.add_argument('--no-sandbox')  # 取消沙盒模式
 
         # 設定 ChromeDriver 的路徑
-        service = Service('C:\Finn\Git\chromedriver-win64\chromedriver.exe')  # 替換為你的 chromedriver.exe 的實際路徑
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        #service = Service('C:\Finn\Git\chromedriver-win64\chromedriver.exe')  # 替換為你的 chromedriver.exe 的實際路徑
+        #driver = webdriver.Chrome(service=service, options=chrome_options)
         
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+
         driver.get(url)
         
         # 顯式等待，直到表格出現

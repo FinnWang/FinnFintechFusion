@@ -11,6 +11,8 @@ import os
 from sqlalchemy import create_engine, Column, Integer, String, Float, Date, UniqueConstraint
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import IntegrityError
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 Base = declarative_base()
 
@@ -49,7 +51,10 @@ def get_taifex_futures_contracts_data(url):
         chrome_options.add_argument('--start-maximized')
 
         # 設定 ChromeDriver 的路徑
-        service = Service('C:\Finn\Git\chromedriver-win64\chromedriver.exe')  # 替換為你的 chromedriver.exe 的實際路徑
+        #service = Service('C:\Finn\Git\chromedriver-win64\chromedriver.exe')  # 替換為你的 chromedriver.exe 的實際路徑
+        #driver = webdriver.Chrome(service=service, options=chrome_options)
+
+        service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
         
         driver.get(url)
